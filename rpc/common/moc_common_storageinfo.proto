@@ -11,6 +11,8 @@ import "moc_common_common.proto";
 message StorageContainerInfo {
 	Capacity capacity  = 1;
 	Latency latency	= 2;
+	string node = 3;
+	string zone = 4;
 	Status status = 7;
 }
 
@@ -21,4 +23,8 @@ message Capacity {
 
 message Latency {
 	uint64 iops = 1;
+}
+
+enum VirtualHardDiskOperation {
+	UPLOAD = 0;
 }

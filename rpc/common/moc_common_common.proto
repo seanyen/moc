@@ -15,6 +15,8 @@ enum Operation {
 	IMPORT = 4;
 	EXPORT = 5;
 	VALIDATE = 6;
+	HYDRATE = 7;
+	DISCOVER = 8;
 }
 
 enum ProvisionState {
@@ -38,6 +40,7 @@ enum ProvisionState {
 	IMPORTING = 17;
 	IMPORTED = 18;
 	IMPORT_FAILED = 19;
+	UPLOADING = 20;
 }
 
 enum HighAvailabilityState {
@@ -56,11 +59,19 @@ enum HealthState {
 	DEGRADED = 5;
 	// The entity went missing from the agent
 	NOTFOUND = 6;
+	NOTREADY = 7;
 }
+
+enum Priority { 
+    DEFAULT = 0;
+    LOW = 1;  
+    MEDIUM = 2;  
+    HIGH = 3;
+} 
 
 message Error {
 	string Message = 1;
-	int32 Code = 2;
+	uint32 Code = 2;
 	string Parameters = 3;
 }
 
@@ -103,6 +114,25 @@ message Version {
 	string number = 1;
 }
 
+enum PlacementStatusType {
+	UNKNOWN_PLACEMENT = 0;
+	ALIGNED = 1;
+	NOT_ALIGNED = 2;
+}
+
+message PlacementStatus  {
+	PlacementStatusType Status = 1;
+	string Message = 2;
+}
+
+message UploadStatus {
+	int64 progressPercentage = 1;
+	int64 uploadSizeInBytes = 2;
+	int64 fileSizeInBytes = 3;
+	Error lastUploadError = 4;
+}
+
+// TODO: Reevaluate the status implementation to avoid displaying irrelevant properties for resources, such as UploadStatus for VirtualMachines.
 message Status {
 	Health health = 1;
 	ProvisionStatus provisioningStatus = 2;
@@ -110,6 +140,8 @@ message Status {
 	Version version = 4;
 	DownloadStatus downloadStatus = 5;
 	ValidationStatus validationStatus = 6;
+	PlacementStatus	placementStatus = 7;
+	UploadStatus uploadStatus = 8;
 }
 
 message Entity {
@@ -130,6 +162,16 @@ message Tags {
 	repeated Tag tags = 1;
 }
 
+message ZoneReference {
+	string name = 1;
+}
+
+// Used by VM proto and Placement Group proto, so it is placed in common
+message ZoneConfiguration {
+	repeated ZoneReference zones = 1;
+	bool strictPlacement = 2;
+}
+
 enum ClientType {
 	CONTROLPLANE = 0;
 	EXTERNALCLIENT = 1;
@@ -137,6 +179,7 @@ enum ClientType {
 	ADMIN = 3;
 	BAREMETAL = 4;
 	LOADBALANCER = 5;
+	HOST = 6;
 }
 
 enum AuthenticationType {
@@ -182,6 +225,163 @@ enum ProviderType {
 	Debug                  = 34;
 	BareMetalHost          = 35;
 	Authentication         = 36;
+	HealthMonitor          = 37;
+	LogicalNetwork         = 38;
+	AvailabilitySet		   = 39;
+	NetworkSecurityGroup   = 40;
+	Zone	               = 41;
+	PlacementGroup         = 42;
+	PublicIPAddress        = 43;
+}
+
+// Operations specific to a provider
+// Format is [Provider]_[Operation]
+enum ProviderAccessOperation {
+	Unspecified 					= 0;
+
+	Authentication_Login 			= 100;
+
+	Certificate_Create		 		= 200; 
+	Certificate_Update				= 201;
+	Certificate_Get 				= 202; 
+	Certificate_Delete 				= 203; 
+	Certificate_Sign 				= 204; 
+	Certificate_Renew 				= 205; 
+
+	Identity_Create					= 300; 
+	Identity_Update					= 301; 
+	Identity_Revoke 				= 302; 
+	Identity_Rotate 				= 303;  
+
+	IdentityCertificate_Create		= 400; 
+	IdentityCertificate_Update		= 401; 
+	IdentityCertificate_Renew 		= 402;
+
+	Key_Create						= 500; 
+	Key_Update						= 501; 
+	Key_Encrypt 					= 502; 
+	Key_Decrypt 					= 503; 
+	Key_WrapKey 					= 504; 
+	Key_UnwrapKey					= 505; 
+	Key_Sign 						= 506; 
+	Key_Verify 						= 507; 
+	Key_Rotate                      = 508;
+
+	VirtualMachine_Create 				= 600; 
+	VirtualMachine_Update 				= 601; 
+	VirtualMachine_Delete				= 602; 
+	VirtualMachine_Validate				= 603; 
+	VirtualMachine_Start 				= 604;
+	VirtualMachine_Stop 				= 605;
+	VirtualMachine_Reset 				= 606;
+	VirtualMachine_Repair_Guest_Agent		= 607;
+	VirtualMachine_Pause 				= 608;
+	VirtualMachine_Save 				= 609;
+	VirtualMachine_Remove_Iso_Disk			= 610;
+
+	Cluster_Create					= 700; 
+	Cluster_Update 					= 701; 
+	Cluster_LoadCluster 			= 702; 
+	Cluster_UnloadCluster 			= 703; 
+	Cluster_GetCluster 				= 704; 
+	Cluster_GetNodes 				= 705; 
+
+	Debug_DebugServer				= 800; 
+	Debug_StackTrace				= 801;
+
+	BaremetalHost_Create            = 900;
+	BaremetalHost_Update            = 901;
+
+	BaremetalMachine_Create         = 1000;
+	BaremetalMachine_Update         = 1001;
+
+	ControlPlane_Create             = 1100;
+	ControlPlane_Update             = 1101;
+
+	EtcdCluster_Create              = 1200;
+	EtcdCluster_Update              = 1201;
+
+	EtcdServer_Create               = 1300;
+	EtcdServer_Update               = 1301;
+
+	GalleryImage_Create             = 1400;
+	GalleryImage_Update             = 1401;
+
+	Group_Create            		= 1500;
+	Group_Update            		= 1501;
+
+	KeyVault_Create         		= 1600;
+	KeyVault_Update         		= 1601;
+
+	Kubernetes_Create               = 1700;
+	Kubernetes_Update               = 1701;
+
+	LoadBalancer_Create             = 1800;
+	LoadBalancer_Update             = 1801;
+
+	Location_Create         		= 1900;
+	Location_Update         		= 1901;
+
+	Macpool_Create          		= 2000;
+	Macpool_Update          		= 2001;
+
+	NetworkInterface_Create         = 2100;
+	NetworkInterface_Update         = 2101;
+
+	Node_Create             		= 2200;
+	Node_Update             		= 2201;
+
+	Recovery_Create         		= 2300;
+	Recovery_Update         		= 2301;
+
+	Role_Create             		= 2400;
+	Role_Update             		= 2401;
+
+	RoleAssignment_Create           = 2500;
+	RoleAssignment_Update           = 2501;
+
+	Secret_Create           		= 2600;
+	Secret_Update           		= 2601;
+
+	StorageContainer_Create         = 2700;
+	StorageContainer_Update         = 2701;
+
+	Subscription_Create             = 2800;
+	Subscription_Update             = 2801;
+
+	Validation_Validate             = 2900;
+
+	VipPool_Create          		= 3000;
+	VipPool_Update          		= 3001;
+
+	VirtualHardDisk_Create          = 3100;
+	VirtualHardDisk_Update          = 3101;
+	VirtualHardDisk_Upload          = 3102;
+
+	VirtualMachineImage_Create      = 3200;
+	VirtualMachineImage_Update      = 3201;
+
+	VirtualMachineScaleSet_Create   = 3300;
+	VirtualMachineScaleSet_Update   = 3301;
+
+	VirtualNetwork_Create           = 3400;
+	VirtualNetwork_Update           = 3401;
+
+	AvailabilitySet_Create		    = 3500;
+	AvailabilitySet_Delete		    = 3501;
+
+	NetworkSecurityGroup_Create 	= 3600;
+	NetworkSecurityGroup_Update 	= 3601;
+
+	Zone_Create         		    = 3700;
+	Zone_Delete		                = 3701;
+	Zone_Update	            	    = 3702;
+
+	PlacementGroup_Create		    = 3800;
+	PlacementGroup_Delete		    = 3801;
+
+	PublicIPAddress_Create 			= 3900;
+	PublicIPAddress_Update 			= 3901;
 }
 
 extend google.protobuf.FieldOptions {
@@ -189,10 +389,10 @@ extend google.protobuf.FieldOptions {
 }
 
 enum ImageSource {
-        LOCAL_SOURCE = 0;
-        SFS_SOURCE   = 1;
-        HTTP_SOURCE  = 2;
-        CLONE_SOURCE = 3;
+	LOCAL_SOURCE = 0;
+	SFS_SOURCE   = 1;
+	HTTP_SOURCE  = 2;
+	CLONE_SOURCE = 3;
 }
 
 enum HyperVGeneration {
@@ -203,9 +403,16 @@ enum HyperVGeneration {
 enum DiskFileFormat {
 	DiskFileFormatVHDX =  0;
 	DiskFileFormatVHD = 1;
+	DiskFileFormatUNKNOWN = 2;
+	DiskFileFormatVHDSet = 3;
 } 
 
 enum CloudInitDataSource {
 	NoCloud = 0;
 	Azure = 1;
+}
+
+message ApiVersion {
+	uint32 major = 1;
+	uint32 minor = 2;
 }

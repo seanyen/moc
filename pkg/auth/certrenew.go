@@ -71,7 +71,7 @@ func renewRequired(x509Cert *x509.Certificate) bool {
 	return true
 }
 
-func certCheck(pemCert []byte) error {
+func CertCheck(pemCert []byte) error {
 
 	x509Cert, err := certs.DecodeCertPEM([]byte(pemCert))
 	if err != nil {
@@ -113,7 +113,7 @@ func renewCertificate(server string, wssdConfig *WssdConfig) (retConfig *WssdCon
 		return
 	}
 
-	if err = certCheck(pemCert); err != nil {
+	if err = CertCheck(pemCert); err != nil {
 		return
 	}
 
@@ -142,7 +142,7 @@ func renewCertificate(server string, wssdConfig *WssdConfig) (retConfig *WssdCon
 	}
 
 	renewRequest := &security.IdentityCertificateRequest{
-		OperationType: common.IdentityCertificateOperation_RENEW_CERTIFICATE,
+		OperationType: common.ProviderAccessOperation_IdentityCertificate_Renew,
 		IdentityName:  wssdConfig.IdentityName,
 		CSR:           []*security.CertificateSigningRequest{csr},
 	}
@@ -162,11 +162,10 @@ func renewCertificate(server string, wssdConfig *WssdConfig) (retConfig *WssdCon
 	renewed = true
 
 	newWssdConfig := &WssdConfig{
-		CloudCertificate:      wssdConfig.CloudCertificate,
-		ClientCertificate:     marshal.ToBase64(response.Certificates[0].Certificate),
-		ClientKey:             marshal.ToBase64(string(newKey)),
-		ClientCertificateType: wssdConfig.ClientCertificateType,
-		IdentityName:          wssdConfig.IdentityName,
+		CloudCertificate:  wssdConfig.CloudCertificate,
+		ClientCertificate: marshal.ToBase64(response.Certificates[0].Certificate),
+		ClientKey:         marshal.ToBase64(string(newKey)),
+		IdentityName:      wssdConfig.IdentityName,
 	}
 	return newWssdConfig, renewed, nil
 }
@@ -181,15 +180,13 @@ func RenewCertificates(server string, wssdConfigLocation string) error {
 		}
 		return err
 	}
-	if accessFile.ClientCertificateType == CASigned {
-		retAccessFile, renewed, err := renewCertificate(server, &accessFile)
-		if err != nil {
+	retAccessFile, renewed, err := renewCertificate(server, &accessFile)
+	if err != nil {
+		return err
+	}
+	if renewed {
+		if err = marshal.ToJSONFile(*retAccessFile, wssdConfigLocation); err != nil {
 			return err
-		}
-		if renewed {
-			if err = marshal.ToJSONFile(*retAccessFile, wssdConfigLocation); err != nil {
-				return err
-			}
 		}
 	}
 

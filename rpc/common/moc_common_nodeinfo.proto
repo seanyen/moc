@@ -8,6 +8,15 @@ package moc.common;
 import "moc_common_common.proto";
 import "moc_common_computecommon.proto";
 
+enum OsRegistrationState {
+	notRegistered = 0;
+	registered = 1;
+}
+
+message OsRegistrationStatus {
+	OsRegistrationState status = 1;
+}
+
 message Processor {
 	string name = 1;
 	uint32 cores = 2;
@@ -24,15 +33,18 @@ message PhysicalMemory {
 	uint64 sizeBytes = 1;
 }
 
-message GPU {
-	string name = 1;
-	uint32 sizeBytes = 2;
-	uint32 count = 3;
+message HostGPU {
+	string id = 1;
+	string name = 2;
+	uint64 partitionSizeMB = 3;
+	AssignmentType assignment = 4;
 }
 
 message OperatingSystem {
 	uint64 operatingsystemsku = 1;
 	OperatingSystemType ostype = 2;
+	string osversion = 3;
+	OsRegistrationStatus osRegistrationStatus = 4;
 }
 
 message NodeInfo {
@@ -42,12 +54,16 @@ message NodeInfo {
 	Resources availability = 4;
 	OperatingSystemType ostype = 6;
 	Status status = 7;
+	int64 uptime = 8;
+	OperatingSystem osInfo = 9;
 }
 
-message Resources {   
+message Resources {
+	reserved 3;
+	reserved 4;
+	reserved 6;
 	Processor processor = 1;
 	PhysicalMemory memory = 2;
-	GPU gpu = 3;
-	OperatingSystem osInfo = 4;
+	VirtualMachineCapabilities vmCapabilities = 5;
+	repeated HostGPU hostGPUs = 7;
 }
-

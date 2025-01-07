@@ -2,6 +2,8 @@
 // Licensed under the Apache v2.0 license.
 package certs
 
+//go:generate mockgen -destination mock/mock_certificateAuthority.go github.com/microsoft/moc/pkg/certs Revocation
+
 import (
 	"bytes"
 	"crypto/rand"
@@ -160,6 +162,10 @@ func (ca *CertificateAuthority) SignRequest(csrPem []byte, oldCertPem []byte, co
 		extKeyUsage = append(extKeyUsage, x509.ExtKeyUsageServerAuth)
 	}
 
+	if conf != nil && conf.IsCA {
+		keyUsage |= x509.KeyUsageCertSign
+	}
+
 	csr, err := DecodeCertRequestPEM(csrPem)
 	if err != nil {
 		return
@@ -170,6 +176,9 @@ func (ca *CertificateAuthority) SignRequest(csrPem []byte, oldCertPem []byte, co
 			return nil, errors.Wrapf(errors.InvalidInput, "Old certificate verification failed : %v", err)
 		}
 		oldCert, err = DecodeCertPEM(oldCertPem)
+		if err != nil {
+			return
+		}
 	}
 	err = csr.CheckSignature()
 	if err != nil {
@@ -183,9 +192,11 @@ func (ca *CertificateAuthority) SignRequest(csrPem []byte, oldCertPem []byte, co
 
 	offset := (time.Hour * 24 * 365)
 	accessIdentity := []byte{}
+	isCA := false
 	if conf != nil {
 		offset = conf.Offset
 		accessIdentity = []byte(conf.Identity)
+		isCA = conf.IsCA
 	}
 	now := time.Now().UTC()
 
@@ -199,6 +210,8 @@ func (ca *CertificateAuthority) SignRequest(csrPem []byte, oldCertPem []byte, co
 		BasicConstraintsValid: true,
 		DNSNames:              csr.DNSNames,
 		IPAddresses:           csr.IPAddresses,
+		IsCA:                  isCA,
+		MaxPathLenZero:        isCA, // Enable MaxPathLenZero only when is CA
 	}
 
 	csrRenewCertsPEM := []byte{}
@@ -292,7 +305,9 @@ func (ca *CertificateAuthority) SignRequest(csrPem []byte, oldCertPem []byte, co
 			if ext.Id.Equal(oidOriginalCertificate) {
 				origCertDER = ext.Value
 			} else if ext.Id.Equal(oidRenewCount) {
-				asn1.Unmarshal(ext.Value, &renewCount)
+				if _, err := asn1.Unmarshal(ext.Value, &renewCount); err != nil {
+					return nil, errors.Wrapf(err, "Failed to unmarshall renew count")
+				}
 			}
 		}
 

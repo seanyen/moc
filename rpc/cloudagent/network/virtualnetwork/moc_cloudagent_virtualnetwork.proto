@@ -21,13 +21,10 @@ enum VirtualNetworkType {
     Mirrored = 8;
 }
 
-enum IPPoolType {
-	VM = 0;
-	VIPPool = 1;
-}
 message VirtualNetworkRequest {
 	repeated VirtualNetwork VirtualNetworks = 1;
 	Operation OperationType = 2;
+	ApiVersion version = 3;
 }
 
 message VirtualNetworkResponse {
@@ -36,22 +33,37 @@ message VirtualNetworkResponse {
 	string  Error = 3;
 }
 
+message VirtualNetworkPrecheckRequest {
+	repeated VirtualNetwork VirtualNetworks = 1;
+}
+
+message VirtualNetworkPrecheckResponse {
+	// The precheck result: true if the precheck criteria is passed; otherwise, false
+	google.protobuf.BoolValue Result = 1;
+
+	// The error message if the precheck is not passed; otherwise, empty string
+	string Error = 2;
+}
+
 message VirtualNetwork {
 	reserved 11;
 	string name = 1;
 	string id = 2;
 	repeated Subnet subnets = 3;
-	Dns dns = 4;
+	Dns dns = 4 [(sensitive) = true];
 	VirtualNetworkType type = 5;
 	string nodefqdn = 6;
 	string groupName = 7;
 	Status status = 8;
 	string locationName = 9;
-	string macPoolName = 10;
+	string macPoolName = 10 [(sensitive) = true];
 	Tags tags = 12;
+	NetworkReference logicalNetwork = 13;
+	repeated string cidr = 14;
 }
 
 message Subnet {
+	reserved 8; // deprecated string version of networkSecurityGroup 
 	string name = 1;
 	string id = 2;
 	string cidr = 3;
@@ -59,32 +71,19 @@ message Subnet {
 	IPAllocationMethod allocation = 5;
 	uint32 vlan = 6;
 	repeated IPPool ippools = 7;
-}
-
-message IPPoolInfo {
-	string used = 1;
-	string available = 2;
-}
-
-message IPPool {
-	string name = 1;
-	IPPoolType type = 2;
-	string start = 3;
-	string end = 4;
-	IPPoolInfo info = 5;
+	NetworkSecurityGroupReference networksecuritygroupref = 9;
+	Tags tags = 10;
 }
 
 message Ipam {
 	string type = 1;
 	repeated Subnet subnets = 2;
 }
-message Route {
-	string nexthop = 1;
-	string destinationprefix = 2;
-	uint32 metric = 3;
-}
 
 service VirtualNetworkAgent {
 	rpc Invoke(VirtualNetworkRequest) returns (VirtualNetworkResponse) {}
+
+	// Prechecks whether the system is able to create specified virtual networks (but does not actually create them).
+	rpc Precheck(VirtualNetworkPrecheckRequest) returns (VirtualNetworkPrecheckResponse) {}
 }
 

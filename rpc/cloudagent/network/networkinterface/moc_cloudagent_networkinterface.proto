@@ -20,19 +20,37 @@ message NetworkInterfaceResponse {
 	string  Error = 3;
 }
 
+message NetworkInterfacePrecheckRequest {
+	repeated NetworkInterface NetworkInterfaces = 1;
+}
+
+message NetworkInterfacePrecheckResponse {
+	// The precheck result: true if the precheck criteria is passed; otherwise, false
+	google.protobuf.BoolValue Result = 1;
+
+	// The error message if the precheck is not passed; otherwise, empty string
+	string Error = 2;
+}
+
 message InboundNatRule {
 	string name = 1;
 }
 
 message IpConfiguration {
-	string ipaddress = 1;
+	reserved 11; // deprecated string version of networkSecurityGroup
+	string ipaddress = 1 [(sensitive) = true];
 	string prefixlength = 2;
 	string subnetid = 3;
 	bool primary = 4;
 	repeated string loadbalanceraddresspool = 5;
 	IPAllocationMethod allocation = 6;
-	string gateway = 7;
+	string gateway = 7 [(sensitive) = true];
 	repeated InboundNatRule inboundNatRules = 8;
+	Tags tags = 9;
+	NetworkType networkType = 10;
+	NetworkSecurityGroupReference networkSecurityGroupRef = 12;
+	SubnetReference subnet = 13;
+	PublicIPAddressReference publicIPAddressRef = 14; 
 }
 
 message NetworkInterface {
@@ -44,8 +62,8 @@ message NetworkInterface {
 	}
 	NetworkInterfaceType type = 3;
 	repeated IpConfiguration ipConfigurations = 4;
-	string macaddress = 5;
-	Dns dns = 6;
+	string macaddress = 5 [(sensitive) = true];
+	Dns dns = 6 [(sensitive) = true];
 	string nodeName = 7;
 	string groupName = 8;
 	string locationName = 9;
@@ -57,4 +75,7 @@ message NetworkInterface {
 
 service NetworkInterfaceAgent {
 	rpc Invoke(NetworkInterfaceRequest) returns (NetworkInterfaceResponse) {}
+
+	// Prechecks whether the system is able to create specified network interfaces (but does not actually create them).
+	rpc Precheck(NetworkInterfacePrecheckRequest) returns (NetworkInterfacePrecheckResponse) {}
 }
