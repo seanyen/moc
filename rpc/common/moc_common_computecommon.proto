@@ -62,6 +62,30 @@ enum VirtualMachineSizeType {
 	Standard_F4s_HPN = 27;
 	Standard_F8s_HPN = 28;
 	Standard_F16s_HPN = 29;
+	Standard_NC4_A2 = 30;
+	Standard_NC8_A2 = 31;
+	Standard_NC16_A2 = 32;
+	Standard_NC32_A2 = 33;
+	Standard_NC4_A30 = 34;
+	Standard_NC8_A30 = 35;
+	Standard_NC16_A30 = 36;
+	Standard_NC32_A30 = 37;
+	Standard_NC4_A100_40 = 38;
+	Standard_NC8_A100_40 = 39;
+	Standard_NC16_A100_40 = 40;
+	Standard_NC32_A100_40 = 41;
+	Standard_NC4_A100_80 = 42;
+	Standard_NC8_A100_80 = 43;
+	Standard_NC16_A100_80 = 44;
+	Standard_NC32_A100_80 = 45;
+	Standard_NC4_A16 = 46;
+	Standard_NC8_A16 = 47;
+	Standard_NC16_A16 = 48;
+	Standard_NC32_A16 = 49;
+	Standard_NC24_H100 = 50;
+	Standard_NC48_H100 = 51;
+	Standard_NC80_H100 = 52;
+	Standard_NC96_H100 = 53;
 	Custom_A2 = 95;
 	Custom_NK = 96;
 	Custom_Gpupv = 97;
@@ -82,7 +106,21 @@ message WinRMConfiguration {
 	repeated WinRMListener Listeners = 1;
 }
 
+enum AssignmentType {
+	GpuDDA = 0;
+	GpuP = 1;
+	GpuPV = 2;
+	GpuDefault = 3; // default is used when customer do not pass GPU Assign Type and moc will decide the assign type based on the underlying configuration.
+}
+
+message VirtualMachineGPU {
+	AssignmentType assignment = 1;
+	uint64 partitionSizeMB = 2;
+	string name = 3;
+}
+
 message VirtualMachineCustomSize {
+	reserved 4;
 	int32 cpuCount = 1;
 	int32 memoryMB = 2;
 	int32 gpuCount = 3;
@@ -100,23 +138,30 @@ enum PowerState {
 	Off = 2;
 	Paused = 3;
 	Critical = 4;
+	Saved = 5;
 }
 
 enum VirtualMachineOperation {
 	START = 0;
 	STOP = 1;
 	RESET = 2;
+	REPAIR_GUEST_AGENT = 3;
+	PAUSE = 4;
+	SAVE = 5;
+	REMOVE_ISO_DISK = 6;
 }
 
 enum VirtualMachineRunCommandExecutionState {
 	ExecutionState_UNKNOWN = 0;
 	ExecutionState_FAILED = 1;
 	ExecutionState_SUCCEEDED = 2;
+	ExecutionState_PENDING = 3;
+	ExecutionState_REBOOTING = 4;
 }
 
 message VirtualMachineRunCommandInputParameter {
     string Name = 1;
-    string Value = 2 [(sensitivecompute) = true];
+    string Value = 2 [(sensitivejson) = true];
 }
 
 message VirtualMachineRunCommandScriptSource {
@@ -130,6 +175,42 @@ message VirtualMachineRunCommandInstanceView {
 	int32 ExitCode = 2;
 	string Output = 3;
 	string Error = 4;
+}
+
+enum ConfidentialVMHardwareType {
+	HardwareTypeNone = 0;
+	HardwareTypeSEVSNP = 1;
+	HardwareTypeTDX = 2;
+}
+
+// describes the the capabilities of this node in terms of what type of VM can be created
+message VirtualMachineCapabilities {
+	bool IsolatedVmCapable =  1;
+	ConfidentialVMHardwareType ConfidentialVMHardwareCapability = 2;
+}
+
+message InstanceViewStatus {
+	enum StatusLevelType {
+		Unknown = 0;
+		Info = 1 ;
+		Warning = 2;
+		Error = 3;
+	}
+
+	string code = 1;
+	StatusLevelType level = 2;
+	string displayStatus = 3;
+	string message = 4;
+	string time = 5;
+}
+
+message VirtualMachineAgentInstanceView {
+	string vmAgentVersion = 1;
+	repeated InstanceViewStatus statuses = 2;
+}
+
+message GuestAgentConfiguration {
+	bool enabled = 1;
 }
 
 /* Values fetched from Win32_Processor class.
@@ -149,4 +230,31 @@ enum Architecture {
 
 extend google.protobuf.FieldOptions {
 	bool sensitivecompute = 50002;
+	bool sensitivejson = 50003;
+}
+
+enum SecurityType {
+        NOTCONFIGURED = 0;
+        TRUSTEDLAUNCH = 1;
+        CONFIDENTIALVM = 2;
+}
+
+enum SecurityEncryptionTypes {
+    SecurityEncryptionNone = 0;
+    NonPersistedTPM = 1;
+}
+
+message VMDiskSecurityProfile {
+    SecurityEncryptionTypes securityEncryptionType = 1;
+}
+
+message VirtualMachineManagedDiskParameters {
+    VMDiskSecurityProfile securityProfile = 1;
+}
+
+message ProxyConfiguration {
+	string httpProxy = 1 [(sensitivecompute) = true];
+	string httpsProxy = 2 [(sensitivecompute) = true];
+	repeated string noProxy = 3;
+	string trustedCa = 4 [(sensitivecompute) = true];
 }

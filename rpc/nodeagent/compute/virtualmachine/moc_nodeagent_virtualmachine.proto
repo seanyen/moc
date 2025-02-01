@@ -29,6 +29,7 @@ message SSHPublicKey {
 message Disk {
 	// reference to the virtual hard disk managed by storage
 	string diskname = 1;
+    VirtualMachineManagedDiskParameters managedDisk = 2;
 }
 
 message SharedFolder {
@@ -87,12 +88,14 @@ message OperatingSystemConfiguration {
 	OperatingSystemBootstrapEngine osBootstrapEngine = 7;
 	LinuxConfiguration linuxConfiguration = 8;
 	WindowsConfiguration windowsConfiguration = 9;
+	ProxyConfiguration proxyConfiguration = 10;
 }
 
 message HardwareConfiguration {
 	VirtualMachineSizeType VMSize = 1;
 	VirtualMachineCustomSize customSize = 2;
 	DynamicMemoryConfiguration dynamicMemoryConfiguration = 3;
+	repeated VirtualMachineGPU virtualMachineGPUs = 4;
 }
 
 message UefiSettings {
@@ -102,6 +105,20 @@ message UefiSettings {
 message SecurityConfiguration {
 	bool enableTPM = 1;
 	UefiSettings uefiSettings = 2;
+	SecurityType securityType = 3;
+}
+
+// Zone entity exists in cloud agent only and platform layer configuration needs node names.
+// So this zone information includes node names associated with zone.
+// This additional info is not present in ZoneReference defined in common file, which is used by cloud agent.
+message ZoneReference {
+	string name = 1;
+	repeated string nodes = 2;
+}
+
+message ZoneConfiguration {
+	repeated ZoneReference zones = 1;
+	bool strictPlacement = 2;
 }
 
 message VirtualMachine {
@@ -119,6 +136,10 @@ message VirtualMachine {
 	Entity entity = 12;
 	HighAvailabilityState highAvailabilityState = 13;
 	Tags tags = 14;
+	GuestAgentConfiguration guestAgent = 15;
+	VirtualMachineAgentInstanceView guestAgentInstanceView = 16;
+	ZoneConfiguration zoneConfiguration = 17;
+	Priority priority = 18;
 }
 
 message VirtualMachineOperationRequest {

@@ -5,6 +5,8 @@ syntax = "proto3";
 option go_package = "github.com/microsoft/moc/rpc/common";
 package moc;
 
+import "moc_common_common.proto";
+
 message Dns {
 	repeated string servers = 1;
 	string domain = 2;
@@ -16,10 +18,70 @@ enum Protocol {
 	All = 0;
 	Tcp = 1;
 	Udp = 2;
+	Icmpv4 = 3;
+	Icmpv6 = 4;
 }
 
 enum IPAllocationMethod {
 	Invalid = 0;
 	Dynamic = 1;
 	Static = 2;
+}
+
+enum IPPoolType {
+	VM = 0;
+	VIPPool = 1;
+}
+
+enum NetworkType {
+	VIRTUAL_NETWORK = 0;
+	LOGICAL_NETWORK = 1;
+	UNDEFINED = 2;
+}
+
+enum IPVersion {
+	IPv4 = 0;
+	IPv6 = 1;
+}
+
+message IPPoolInfo {
+	string used = 1;
+	string available = 2;
+}
+
+message IPPool {
+	string name = 1;
+	IPPoolType type = 2;
+	string start = 3;
+	string end = 4;
+	IPPoolInfo info = 5;
+	Tags tags = 6;
+}
+
+message Route {
+	string nextHop = 1;
+	string destinationPrefix = 2;
+	uint32 metric = 3;
+}
+
+// Resource reference is intended to be used as a general component of specific, named resource references
+message ResourceReference {
+	string name = 1;
+}
+
+message NetworkSecurityGroupReference {
+	ResourceReference resourceRef = 1;
+}
+
+message NetworkReference {
+	ResourceReference resourceRef = 1;
+	NetworkType networkType = 2;
+}
+
+message SubnetReference {
+	NetworkReference network = 1;
+	ResourceReference resourceRef = 2;
+}
+message PublicIPAddressReference {
+	ResourceReference resourceRef = 1;
 }

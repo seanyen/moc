@@ -33,8 +33,14 @@ const (
 	LBContributorRoleName = "LBContributor"
 	// Network Interface Contributor Role - has permissions to run any operation on network interfaces
 	NIContributorRoleName = "NetworkInterfaceContributor"
+	// Network Security Group Contributor Role - has permissions to run any operation on network security groups
+	NSGContributorRoleName = "NetworkSecurityGroupContributor"
+	// PublicIPAddress Contributor Role - has permissions to run any operation on public IP address
+	PIPContributorRoleName = "PublicIPAddressContributor"
 	// VM Contributor Role - has permissions to run any operation on VMs
 	VMContributorRoleName = "VMContributor"
+	// VM Updater Role - has permissions to update VMs
+	VMUpdaterRoleName = "VMUpdater"
 	// VirtualMachineImage Contributor Role - has permissions to run any operation on VirtualMachineImages
 	VMIContributorRoleName = "VirtualMachineImageContributor"
 	// VirtualMachineScaleSet Contributor Role - has permissions to run any operation on VirtualMachineScaleSets
@@ -43,6 +49,8 @@ const (
 	BMMContributorRoleName = "BareMetalMachineContributor"
 	// VirtualNetwork Contributor Role - has permissions to run any operation on VirtualNetworks
 	VNetContributorRoleName = "VirtualNetworkContributor"
+	// LogicalNetwork Contributor Role - has permissions to run any operation on LogicalNetworks
+	LNetContributorRoleName = "LogicalNetworkContributor"
 	// VirtualHardDisk Contributor Role - has permissions to run any operation on VirtualHardDisks
 	VHDContributorRoleName = "VirtualHardDiskContributor"
 	// Kubernetes Contributor Role - has permissions to run any operation on Kubernetes resources
@@ -63,6 +71,12 @@ const (
 	KeyContributorRoleName = "KeyContributor"
 	// Secret Contributor role - has permissions to run any operation on Secrets
 	SecretContributorRoleName = "SecretContributor"
+	// AvailabilitySet Contributor Role - has permissions to run any operations on AvailabilitySets
+	AvailabilitySetContributorRoleName = "AvailabilitySetContributor"
+	// Zone Contributor Role - has permissions to run any operations on Zones
+	ZoneContributorRoleName = "ZoneContributor"
+	// PlacementGroup Contributor Role - has permissions to run any operations on PlacementGroups
+	PlacementGroupContributorRoleName = "PlacementGroupContributor"
 	// Location Reader role - has permissions to run read operations on locations
 	LocationReaderRoleName = "LocationReader"
 	// Group Reader Role - has permissions to run read operations on the group resource
@@ -85,6 +99,10 @@ const (
 	LBReaderRoleName = "LBReader"
 	// Network Interface Reader Role - has permissions to run read operations on network interfaces
 	NIReaderRoleName = "NetworkInterfaceReader"
+	// Network Security Group Reader Role - has permissions to run read operations on network security groups
+	NSGReaderRoleName = "NetworkSecurityGroupReader"
+	// PublicIPAddress Reader Role - has permissions to run read operation on public IP address
+	PIPReaderRoleName = "PublicIPAddressReader"
 	// VM Reader Role - has permissions to run read operations on VMs
 	VMReaderRoleName = "VMReader"
 	// VirtualMachineImage Reader Role - has permissions to run read operations on VirtualMachineImages
@@ -95,6 +113,8 @@ const (
 	BMMReaderRoleName = "BareMetalMachineReader"
 	// VirtualNetwork Reader Role - has permissions to run read operations on VirtualNetworks
 	VNetReaderRoleName = "VirtualNetworkReader"
+	// LogicalNetwork Reader Role - has permissions to run read operations on LogicalNetworks
+	LNetReaderRoleName = "LogicalNetworkReader"
 	// VirtualHardDisk Reader Role - has permissions to run read operations on VirtualHardDisks
 	VHDReaderRoleName = "VirtualHardDiskReader"
 	// Kubernetes Reader Role - has permissions to run read operations on Kubernetes resources
@@ -115,4 +135,14 @@ const (
 	KeyReaderRoleName = "KeyReader"
 	// Secret Reader role - has permissions to run read operations on Secrets
 	SecretReaderRoleName = "SecretReader"
+	// Health Reader role - has permissions to read agent health information
+	HealthReaderRoleName = "HealthReader"
+	// AvailabilitySet Reader Role - has permissions to run read operations on AvailabilitySets
+	AvailabilitySetReaderRoleName = "AvailabilitySetReader"
+	// Certificate Signer Role - has permissions to run sign and renew operations on Certificates
+	CertSignerRoleName = "CertificateSigner"
+	// Zone Reader Role - has permissions to run read operations on Zones
+	ZoneReaderRoleName = "ZoneReader"
+	// PlacementGroup Reader Role - has permissions to run read operations on PlacementGroups
+	PlacementGroupReaderRoleName = "PlacementGroupReader"
 )

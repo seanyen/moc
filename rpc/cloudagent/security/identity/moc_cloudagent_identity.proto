@@ -23,19 +23,33 @@ message IdentityResponse {
 
 message IdentityOperationRequest {
 	repeated Identity Identities = 1;
-	IdentityOperation OperationType = 2;
+	IdentityOperation OBSOLETE_OperationType = 2 [deprecated=true];
+	ProviderAccessOperation OperationType = 3;
 }
 
 message IdentityCertificateRequest {
 	string IdentityName = 1;
 	repeated CertificateSigningRequest CSR = 2;
-	IdentityCertificateOperation OperationType = 3;
+	IdentityCertificateOperation OBSOLETE_OperationType = 3 [deprecated=true];
+	ProviderAccessOperation OperationType = 4;
 }
 
 message IdentityCertificateResponse {
 	repeated Certificate Certificates = 1;
 	google.protobuf.BoolValue Result = 2;
 	string  Error = 3;
+}
+
+message IdentityPrecheckRequest {
+	repeated Identity Identities = 1;
+}
+
+message IdentityPrecheckResponse {
+	// The precheck result: true if the precheck criteria is passed; otherwise, false
+	google.protobuf.BoolValue Result = 1;
+
+	// The error message if the precheck is not passed; otherwise, empty string
+	string Error = 2;
 }
 
 message Identity {
@@ -53,7 +67,7 @@ message Identity {
 	string cloudFqdn = 15;
 	int32 cloudPort = 16;
 	int32 cloudAuthPort = 17;
-	AuthenticationType authType = 18;
+	AuthenticationType authType = 18 [deprecated = true];;
 	bool revoked = 19;
 	bool autoRotate = 20;
 	string loginFilePath = 21;
@@ -64,4 +78,7 @@ service IdentityAgent {
 	rpc Invoke(IdentityRequest) returns (IdentityResponse) {}
 	rpc Operate(IdentityOperationRequest) returns (IdentityResponse) {}
 	rpc OperateCertificates(IdentityCertificateRequest) returns (IdentityCertificateResponse) {}
+
+	// Prechecks whether the system is able to create specified identities (but does not actually create them).
+	rpc Precheck(IdentityPrecheckRequest) returns (IdentityPrecheckResponse) {}
 }

@@ -1,34 +1,40 @@
 module github.com/microsoft/moc
 
-go 1.19
+go 1.22
 
 require (
-	github.com/golang/protobuf v1.5.2
-	github.com/hectane/go-acl v0.0.0-20190604041725-da78bae5fc95
-	github.com/jmespath/go-jmespath v0.3.0
-	github.com/microsoft/wmi v0.5.0-alpha.11
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang/mock v1.6.0
+	github.com/golang/protobuf v1.5.4
+	github.com/hectane/go-acl v0.0.0-20230122075934-ca0b05cb1adb
+	github.com/jmespath/go-jmespath v0.4.0
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.7.0
-	google.golang.org/grpc v1.23.0
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+	github.com/stretchr/testify v1.8.3
+	go.uber.org/multierr v1.11.0
+	google.golang.org/grpc v1.59.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.0 // indirect
-	github.com/kr/pretty v0.1.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
-	golang.org/x/sys v0.0.0-20220915200043-7b5979e65e41 // indirect
-	golang.org/x/text v0.7.0 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250127172529-29210b9bc287 // indirect
+	google.golang.org/protobuf v1.36.4 // indirect
 )
 
 replace (
-	github.com/golang/protobuf/protoc-gen-go => github.com/golang/protobuf/protoc-gen-go v1.3.2
-	golang.org/x/net => golang.org/x/net v0.0.0-20220822230855-b0a4917ee28c
+	github.com/golang/mock => github.com/golang/mock v1.6.0
+	github.com/stretchr/testify => github.com/stretchr/testify v1.8.3
+	go.opentelemetry.io/proto/otlp => go.opentelemetry.io/proto/otlp v0.19.0
+	golang.org/x/crypto => golang.org/x/crypto v0.32.0
+	golang.org/x/image => golang.org/x/image v0.10.0
 	golang.org/x/sys => golang.org/x/sys v0.0.0-20220823224334-20c2bfdbfe24
-	google.golang.org/grpc => google.golang.org/grpc v1.26.0
+	google.golang.org/grpc => google.golang.org/grpc v1.59.0
+	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.2.8
 )
+
+// Brought in by google.golang.org/grpc bump to 1.56.3, but uses CC-BY-SA-3.0 copyleft license
+exclude github.com/ajstarks/deck/generate v0.0.0-20210309230005-c3f852c02e19
